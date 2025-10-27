@@ -17,6 +17,34 @@
 # Avoid python env
 env/*
 
+### Go ###
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool
+*.out
+
+# Go workspace file
+go.work
+
+# Dependency directories
+vendor/
+
+# Generated translation files
+init/translation_map.json
+init/translation_map.txt
+
+# Process output and backup files
+process/output/global.ini
+process/bak/global_bak.ini
+
 ### Eclipse ###
 
 .metadata
