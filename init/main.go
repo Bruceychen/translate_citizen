@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"sort"
 	"strings"
 )
 
@@ -101,7 +102,7 @@ func parseINIFile(filepath string) (map[string]string, error) {
 	return entries, nil
 }
 
-// writeJSON writes the entries to a JSON file
+// writeJSON writes the entries to a JSON file with sorted keys
 func writeJSON(filepath string, entries map[string]string) error {
 	file, err := os.Create(filepath)
 	if err != nil {
@@ -109,12 +110,38 @@ func writeJSON(filepath string, entries map[string]string) error {
 	}
 	defer file.Close()
 
-	encoder := json.NewEncoder(file)
-	encoder.SetIndent("", "  ") // Pretty print with 2-space indentation
-
-	if err := encoder.Encode(entries); err != nil {
-		return fmt.Errorf("failed to encode JSON: %w", err)
+	// Extract and sort keys
+	keys := make([]string, 0, len(entries))
+	for key := range entries {
+		keys = append(keys, key)
 	}
+	sort.Strings(keys)
+
+	// Build sorted map structure manually for JSON output
+	writer := bufio.NewWriter(file)
+	defer writer.Flush()
+
+	// Write opening brace
+	fmt.Fprintf(writer, "{\n")
+
+	// Write each key-value pair in sorted order
+	for i, key := range keys {
+		value := entries[key]
+		// Escape JSON strings properly
+		keyJSON, _ := json.Marshal(key)
+		valueJSON, _ := json.Marshal(value)
+
+		fmt.Fprintf(writer, "  %s: %s", keyJSON, valueJSON)
+
+		// Add comma if not the last item
+		if i < len(keys)-1 {
+			fmt.Fprintf(writer, ",")
+		}
+		fmt.Fprintf(writer, "\n")
+	}
+
+	// Write closing brace
+	fmt.Fprintf(writer, "}\n")
 
 	return nil
 }
